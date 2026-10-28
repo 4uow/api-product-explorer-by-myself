@@ -14,7 +14,9 @@ const state = {
     sortBy : "title",
     category : "",
     loading : false,
-    favorites : loadFavorites()
+    favorites : loadFavorites(),
+    lowInventory : false,
+    showFavorites : false
 };
 
 const el = {
@@ -34,7 +36,31 @@ const el = {
     dialog : document.querySelector("#productDialog"),
     dialogContent : document.querySelector("#dialogContent"),
     closeDialog : document.querySelector("#closeDialogButton"),
+    lowInventory : document.querySelector("#low-inventory"),
+    showFavorites : document.querySelector("#show-favorites")
 };
+
+async function lowInventory() {
+    const islowInventory = el.lowInventory.checked;
+    if (islowInventory) {
+        const data =await requestJson(buildProductUrl());
+        state.products = [];
+        for (const product of data.products) {
+            let i = 0;
+            if (i >= 12) break;
+            if (Number(product.stock) <= 10) {
+                state.products.push(product);
+                i += 1;
+            }
+        }
+        renderProject();
+    }else{
+        loadProducts();
+        renderProject();
+    }
+}
+
+el.lowInventory.addEventListener("change", lowInventory);
 
 function loadFavorites(){
     try{
