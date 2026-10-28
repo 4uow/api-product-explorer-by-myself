@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="用原生 JavaScript 学习调用 REST API" />
+    <title>商品探索器 · API 学习项目</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="container">
+        <p class="eyebrow">API LEARNING PROJECT · VANILLA JAVASCRIPT</p>
+        <h1>商品探索器</h1>
+        <p class="subtitle">
+          通过真实接口练习请求、JSON 数据渲染、搜索、筛选、分页和错误处理。
+        </p>
+      </div>
+    </header>
+
+    <main class="container main">
+      <section class="panel" aria-label="商品筛选">
+        <form id="searchForm" class="search-form">
+          <label class="sr-only" for="searchInput">搜索商品</label>
+          <input id="searchInput" type="search" placeholder="例如：phone、laptop" />
+          <button class="button primary" type="submit">搜索</button>
+        </form>
+        <div class="filters">
+          <div class="field">
+            <label for="categorySelect">分类</label>
+            <select id="categorySelect">
+              <option value="">全部分类</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sortSelect">排序</label>
+            <select id="sortSelect">
+              <option value="title-asc">名称 A-Z</option>
+              <option value="title-desc">名称 Z-A</option>
+              <option value="price-asc">价格从低到高</option>
+              <option value="price-desc">价格从高到低</option>
+              <option value="rating-desc">评分从高到低</option>
+            </select>
+          </div>
+          <button id="resetButton" class="button secondary" type="button">重置筛选</button>
+        </div>
+      </section>
+
+      <section class="status-area" aria-live="polite">
+        <p id="statusText">正在准备接口请求...</p>
+        <div id="errorBox" class="error-box hidden" role="alert">
+          <span id="errorText"></span>
+          <button id="retryButton" class="button retry" type="button">重试</button>
+        </div>
+      </section>
+
+      <section id="productGrid" class="product-grid" aria-label="商品列表"></section>
+
+      <nav class="pagination" aria-label="商品分页">
+        <button id="prevButton" class="button secondary" type="button">上一页</button>
+        <span id="pageText">第 1 / 1 页</span>
+        <button id="nextButton" class="button secondary" type="button">下一页</button>
+      </nav>
+    </main>
+
+    <footer class="footer">
+      数据来自 <a href="https://dummyjson.com/" target="_blank" rel="noreferrer">DummyJSON</a>。
+      这是 API 学习项目，不是商品交易页面。
+    </footer>
+
+    <dialog id="productDialog">
+      <button id="closeDialogButton" class="dialog-close" type="button" aria-label="关闭详情">×</button>
+      <div id="dialogContent"></div>
+    </dialog>
+  </body>
+</html>
