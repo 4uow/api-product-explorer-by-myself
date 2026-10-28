@@ -43,17 +43,12 @@ const el = {
 async function lowInventory() {
     const islowInventory = el.lowInventory.checked;
     if (islowInventory) {
-        const data =await requestJson(buildProductUrl());
-        state.products = [];
-        for (const product of data.products) {
-            let i = 0;
-            if (i >= 12) break;
-            if (Number(product.stock) <= 10) {
-                state.products.push(product);
-                i += 1;
-            }
-        }
+        const data =await requestJson(API_BASE +"/products/"+"?limit=0");
+        const products = data.products.filter(item => item.stock <= 10);
+        state.total = products.length
+        state.page = 1;
         renderProject();
+        renderStatus("共" + state.total+" 个结果，当前显示第 "+ fitst + "-" + last +"个。");
     }else{
         loadProducts();
         renderProject();
