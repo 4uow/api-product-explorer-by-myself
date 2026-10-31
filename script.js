@@ -38,6 +38,8 @@ const el = {
     showFavorites: document.querySelector("#show-favorites"),
 };
 
+let requestController = null;
+
 function loadFavorites() {
     const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
     return new Set(Array.isArray(saved) ? saved : []);
@@ -88,11 +90,33 @@ function buildProductUrl() {
     return API_BASE + path + "?" + param.toString();
 }
 
-async function requestJson(url) {
-    const response = await fetch(url);
+async function requestJson(url,signal) {
+    const response = await fetch(url, { signal });
     if (!response.ok) throw new Error("接口返回了 HTTP " + response.status);
     return response.json();
 }
+
+function debounce(fn,wait) {
+    let timer = null;
+    const debounced = (...args) => {
+        if (timer !== null) clearTimeout(timer);
+        timer = setTimeout(() => {
+            timer = null;
+            fn(...args);
+        }, wait)
+    }
+
+    debounced.cancel = () => {
+        if (timer !== null) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    }
+
+    return debounced;
+}
+
+
 
 async function loadCategories() {
     try {
@@ -203,6 +227,11 @@ function renderView() {
 
 async function loadProducts() {
     const requestId = ++state.requestId;
+    if(requestController) {
+        requestController.abort();
+    }
+    requestController = new AbortController();
+    const { signal } = requestController;
     state.loading = true;
     hideError();
     renderSkeletons();
@@ -211,20 +240,18 @@ async function loadProducts() {
     el.next.disabled = true;
 
     try {
-        const data = await requestJson(buildProductUrl());
+        const data = await requestJson(buildProductUrl(), signal);
         if (requestId !== state.requestId) return;
         state.products = Array.isArray(data.products) ? data.products : [];
+        state.loading = false;
         renderView();
     } catch (error) {
         if (requestId !== state.requestId) return;
+        if (error.name === "AbortError") return;
         state.products = [];
+        state.loading = false;
         renderView();
         showError("请求失败：" + (error instanceof Error ? error.message : "未知错误"));
-    } finally {
-        if (requestId !== state.requestId) return;
-        state.loading = false;
-        const filtered = getFilteredProducts();
-        renderPagination(filtered);
     }
 }
 
@@ -271,10 +298,21 @@ function openProductDetails(product) {
     el.dialog.showModal();
 }
 
+const debouncedSearch = debounce(() => {   
+    state.query = el.searchInput.value.trim();
+    state.category = "";
+    el.category.value = "";
+    state.page = 1;
+    loadProducts();
+}, 1000);
+
 // ── Event listeners ──────────────────────────────────────────────────────────
+
+el.searchInput.addEventListener("input", debouncedSearch);
 
 el.searchForm.addEventListener("submit", event => {
     event.preventDefault();
+    debouncedSearch.cancel();
     state.query = el.searchInput.value.trim();
     state.category = "";
     el.category.value = "";

@@ -66,3 +66,14 @@
 完成 Vue3 + TypeScript 版本后，可以按实际完成情况描述为：
 
 > 商品探索器：使用 Vue3、TypeScript 和 DummyJSON API 实现商品搜索、分类筛选、排序、分页、详情查看和本地收藏；处理请求加载、错误和空结果状态，并完成响应式布局与部署。
+
+## 框架说明
+先通过loadProducts()加载全部被分类和排序筛选过的商品，然后再通过getFilteredProducts()进行低库存和收藏的筛选，再由renderView()通过state.page切分出要进行展示的商品，然后进行渲染(该过程不改变state.products)。
+
+## 函数说明
+1.最后一版renderPagination()和renderStatus()都需要传入得到的筛选后的全部products
+
+2.renderStatus()和renderPagination()负责渲染状态和页数。renderStatus()和renderPagination()靠调用renderView()间接调用，未独立出现。可以理解为分页和渲染状态，渲染页数是同时发生的。
+
+
+
